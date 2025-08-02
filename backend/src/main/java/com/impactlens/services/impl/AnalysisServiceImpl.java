@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -38,7 +37,7 @@ public class AnalysisServiceImpl implements AnalysisService {
     private JiraTicketRepository jiraTicketRepository;
     
     @Override
-    @Cacheable(value = "analysis", key = "#request.ticketId + ':' + #request.options.hashCode()")
+   // @Cacheable(value = "analysis", key = "#request.ticketId + ':' + #request.options.hashCode()")
     public AnalysisResponse analyzeTicket(AnalysisRequest request, Authentication authentication) {
         long startTime = System.currentTimeMillis();
         logger.info("Starting analysis for ticket: {}", request.getTicketId());
