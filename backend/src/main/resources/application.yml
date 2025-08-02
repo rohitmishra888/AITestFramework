@@ -94,7 +94,7 @@ logging:
  
 # Jira Configuration
 jira:
-  base-url: http://talentica-team-odqenqtw.atlassian.net
+  base-url: https://talentica-team-odqenqtw.atlassian.net
   username: piyush.khandelwal@talentica.com
   api-token: ATATT3xFfGF0PTeKswoqPIGoQZPlNg336NzNVLhetijzen0VV5A0986KWvrmWDocK-YOFIxx5B5fGocNI7VHsC6--KAdrsmjFGX5UjkVLcW4Ss1iywdMGWEzieZgLdfWuV0rzmvMxaMFRfud82WrjunTfvSnzXWX5IlE33MpF4AV-wFr9iAqIzg=65AF248E
   connection-timeout: 30000

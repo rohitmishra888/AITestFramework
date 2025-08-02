@@ -2,8 +2,12 @@ package com.impactlens.dto;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class OpenAIResponse {
     
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ChatCompletionResponse {
         private String id;
         private String object;
@@ -31,6 +35,7 @@ public class OpenAIResponse {
         public void setUsage(Usage usage) { this.usage = usage; }
     }
     
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Choice {
         private int index;
         private Message message;
@@ -46,6 +51,7 @@ public class OpenAIResponse {
         public void setFinish_reason(String finish_reason) { this.finish_reason = finish_reason; }
     }
     
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Message {
         private String role;
         private String content;
@@ -57,6 +63,7 @@ public class OpenAIResponse {
         public void setContent(String content) { this.content = content; }
     }
     
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Usage {
         private int prompt_tokens;
         private int completion_tokens;

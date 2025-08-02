@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -41,25 +42,60 @@ public class JiraServiceImpl implements JiraService {
     public JiraTicket fetchTicket(String ticketKey) {
         logger.info("Fetching ticket from Jira: {}", ticketKey);
         
+        // Validate configuration first
+        if (!jiraConfig.isValidConfiguration()) {
+            logger.error("Invalid Jira configuration. Please check base URL, username, and API token.");
+            return null;
+        }
+        
         try {
-            String url = jiraConfig.getJiraBaseUrl() + "/rest/api/3/issue/" + ticketKey;
+            // Use the formatted base URL
+            String baseUrl = jiraConfig.getFormattedBaseUrl();
+            
+            String url = baseUrl + "rest/api/3/issue/" + ticketKey;
+            logger.debug("Making request to Jira URL: {}", url);
             
             HttpHeaders headers = new HttpHeaders();
             headers.set("Authorization", jiraConfig.getBasicAuthHeader());
             headers.set("Accept", "application/json");
+            headers.set("Content-Type", "application/json");
+            headers.set("User-Agent", "ImpactLens/1.0");
             
             HttpEntity<String> entity = new HttpEntity<>(headers);
             
-            ResponseEntity<JiraApiResponse.Issue> response = jiraRestTemplate.exchange(
-                url, HttpMethod.GET, entity, JiraApiResponse.Issue.class);
+            // First, try to get the raw response to debug
+            ResponseEntity<String> rawResponse = jiraRestTemplate.exchange(
+                url, HttpMethod.GET, entity, String.class);
             
-            JiraApiResponse.Issue issue = response.getBody();
-            if (issue != null) {
-                return convertToJiraTicket(issue);
+            logger.debug("Jira response status: {}", rawResponse.getStatusCode());
+            logger.debug("Jira response headers: {}", rawResponse.getHeaders());
+            logger.debug("Jira response body (first 500 chars): {}", 
+                rawResponse.getBody() != null ? rawResponse.getBody().substring(0, Math.min(500, rawResponse.getBody().length())) : "null");
+            
+            // Check if response is JSON
+            if (rawResponse.getHeaders().getContentType() != null && 
+                rawResponse.getHeaders().getContentType().includes(MediaType.APPLICATION_JSON)) {
+                
+                // Parse the JSON response
+                JiraApiResponse.Issue issue = objectMapper.readValue(rawResponse.getBody(), JiraApiResponse.Issue.class);
+                if (issue != null) {
+                    return convertToJiraTicket(issue);
+                }
+            } else {
+                logger.error("Jira returned non-JSON response. Content-Type: {}, Response: {}", 
+                    rawResponse.getHeaders().getContentType(), rawResponse.getBody());
+                throw new RuntimeException("Jira API returned non-JSON response. Check authentication and URL.");
             }
             
         } catch (Exception e) {
             logger.error("Error fetching ticket {} from Jira: {}", ticketKey, e.getMessage(), e);
+            if (e.getMessage().contains("401")) {
+                logger.error("Authentication failed. Please check Jira credentials.");
+            } else if (e.getMessage().contains("404")) {
+                logger.error("Ticket {} not found in Jira.", ticketKey);
+            } else if (e.getMessage().contains("403")) {
+                logger.error("Access denied. Please check Jira permissions.");
+            }
         }
         
         // Return null if ticket not found or error occurred
@@ -76,8 +112,14 @@ public class JiraServiceImpl implements JiraService {
     public Iterable<JiraTicket> searchTickets(String query) {
         logger.info("Searching tickets in Jira with query: {}", query);
         
+        // Validate configuration first
+        if (!jiraConfig.isValidConfiguration()) {
+            logger.error("Invalid Jira configuration. Please check base URL, username, and API token.");
+            return new ArrayList<>();
+        }
+        
         try {
-            String url = jiraConfig.getJiraBaseUrl() + "/rest/api/3/search";
+            String url = jiraConfig.getFormattedBaseUrl() + "rest/api/3/search";
             
             String jql = "text ~ \"" + query + "\" ORDER BY updated DESC";
             
@@ -89,6 +131,8 @@ public class JiraServiceImpl implements JiraService {
             HttpHeaders headers = new HttpHeaders();
             headers.set("Authorization", jiraConfig.getBasicAuthHeader());
             headers.set("Accept", "application/json");
+            headers.set("Content-Type", "application/json");
+            headers.set("User-Agent", "ImpactLens/1.0");
             
             HttpEntity<String> entity = new HttpEntity<>(headers);
             
@@ -116,11 +160,13 @@ public class JiraServiceImpl implements JiraService {
         logger.info("Fetching comments for ticket: {}", ticketKey);
         
         try {
-            String url = jiraConfig.getJiraBaseUrl() + "/rest/api/3/issue/" + ticketKey + "/comment";
+            String url = jiraConfig.getFormattedBaseUrl() + "rest/api/3/issue/" + ticketKey + "/comment";
             
             HttpHeaders headers = new HttpHeaders();
             headers.set("Authorization", jiraConfig.getBasicAuthHeader());
             headers.set("Accept", "application/json");
+            headers.set("Content-Type", "application/json");
+            headers.set("User-Agent", "ImpactLens/1.0");
             
             HttpEntity<String> entity = new HttpEntity<>(headers);
             
@@ -148,11 +194,13 @@ public class JiraServiceImpl implements JiraService {
         logger.info("Fetching attachments for ticket: {}", ticketKey);
         
         try {
-            String url = jiraConfig.getJiraBaseUrl() + "/rest/api/3/issue/" + ticketKey + "?fields=attachment";
+            String url = jiraConfig.getFormattedBaseUrl() + "rest/api/3/issue/" + ticketKey + "?fields=attachment";
             
             HttpHeaders headers = new HttpHeaders();
             headers.set("Authorization", jiraConfig.getBasicAuthHeader());
             headers.set("Accept", "application/json");
+            headers.set("Content-Type", "application/json");
+            headers.set("User-Agent", "ImpactLens/1.0");
             
             HttpEntity<String> entity = new HttpEntity<>(headers);
             
@@ -190,11 +238,11 @@ public class JiraServiceImpl implements JiraService {
         }
         
         if (fields.getAssignee() != null) {
-            ticket.setAssignee(fields.getAssignee().getEmailAddress());
+            ticket.setAssignee(fields.getAssignee().getDisplayName());
         }
         
         if (fields.getReporter() != null) {
-            ticket.setReporter(fields.getReporter().getEmailAddress());
+            ticket.setReporter(fields.getReporter().getDisplayName());
         }
         
         // Parse dates

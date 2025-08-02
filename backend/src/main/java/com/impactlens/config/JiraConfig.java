@@ -66,4 +66,18 @@ public class JiraConfig {
     public int getReadTimeout() {
         return readTimeout;
     }
+    
+    public boolean isValidConfiguration() {
+        return jiraBaseUrl != null && !jiraBaseUrl.trim().isEmpty() &&
+               jiraUsername != null && !jiraUsername.trim().isEmpty() &&
+               jiraApiToken != null && !jiraApiToken.trim().isEmpty();
+    }
+    
+    public String getFormattedBaseUrl() {
+        String url = jiraBaseUrl.trim();
+        if (!url.endsWith("/")) {
+            url += "/";
+        }
+        return url;
+    }
 } 
