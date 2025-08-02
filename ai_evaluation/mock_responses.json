@@ -1,0 +1,57 @@
+[
+  {
+    "ticketId": "TEST-123",
+    "response": {
+      "report": {
+        "summary": "This ticket addresses a critical bug in the login module.",
+        "gapsIdentified": [
+          {"description": "Missing input validation", "severity": "High"},
+          {"description": "No error logging for failed logins", "severity": "Medium"}
+        ],
+        "recommendations": [
+          "Add input validation for username and password fields.",
+          "Implement error logging for failed login attempts."
+        ],
+        "regressionAreas": [
+          {"area": "Authentication", "riskLevel": "High"}
+        ],
+        "relatedTickets": [
+          {"ticketId": "BUG-101", "relationship": "duplicate"}
+        ]
+      },
+      "metadata": {
+        "processingTime": 1200,
+        "ticketsAnalyzed": 1,
+        "cacheHit": false,
+        "completedAt": "2025-08-02T12:00:00Z",
+        "modelUsed": "gpt-4"
+      }
+    }
+  },
+  {
+    "ticketId": "FEATURE-1011",
+    "response": {
+      "report": {
+        "summary": "Feature request to add dark mode support.",
+        "gapsIdentified": [],
+        "recommendations": [
+          "Ensure all UI components support theme switching.",
+          "Test accessibility in both light and dark modes."
+        ],
+        "regressionAreas": [
+          {"area": "UI Rendering", "riskLevel": "Medium"}
+        ],
+        "relatedTickets": [
+          {"ticketId": "FEATURE-1001", "relationship": "related"}
+        ]
+      },
+      "metadata": {
+        "processingTime": 900,
+        "ticketsAnalyzed": 1,
+        "cacheHit": true,
+        "completedAt": "2025-08-02T12:10:00Z",
+        "modelUsed": "gpt-4"
+      }
+    }
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "ticketId": "TEST-123",
+    "options": {"includeComments": true, "analysisDepth": "full"}
+  },
+  {
+    "ticketId": "TEST-456",
+    "options": {"includeComments": false, "analysisDepth": "summary"}
+  },
+  {
+    "ticketId": "BUG-789",
+    "options": {"includeComments": true, "includeAttachments": true, "analysisDepth": "detailed"}
+  },
+  {
+    "ticketId": "FEATURE-1011",
+    "options": {"includeComments": false, "includeAttachments": false, "analysisDepth": "full"}
+  },
+  {
+    "ticketId": "IMPROVEMENT-2022",
+    "options": {"includeComments": true, "analysisDepth": "summary"}
+  },
+  {
+    "ticketId": "TASK-3033",
+    "options": {"includeComments": false, "analysisDepth": "detailed"}
+  }
+]
