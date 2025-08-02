@@ -90,9 +90,9 @@ public class JiraController {
      * Updates existing tickets and adds new ones
      */
     @PostMapping("/sync")
-    public ResponseEntity<SyncResult> syncAllTickets(
-            @RequestParam(defaultValue = "ORDER BY updated DESC") String jql,
-            @RequestParam(defaultValue = "100") int maxResults) {
+    public ResponseEntity<SyncResult> syncAllTickets(@RequestBody SyncRequest request) {
+        String jql = request.getJql() != null ? request.getJql() : "ORDER BY updated DESC";
+        int maxResults = request.getMaxResults() != null ? request.getMaxResults() : 100;
         
         logger.info("Starting JIRA sync with JQL: {}, maxResults: {}", jql, maxResults);
         
@@ -114,17 +114,56 @@ public class JiraController {
      */
     @PostMapping("/sync/all")
     public ResponseEntity<SyncResult> syncAllTicketsDefault() {
-        return syncAllTickets("ORDER BY updated DESC", 100);
+        SyncRequest request = new SyncRequest();
+        request.setJql("ORDER BY updated DESC");
+        request.setMaxResults(100);
+        return syncAllTickets(request);
     }
     
     /**
      * Sync recent JIRA tickets (updated in last 30 days)
      */
     @PostMapping("/sync/recent")
-    public ResponseEntity<SyncResult> syncRecentTickets(
-            @RequestParam(defaultValue = "30") int days) {
-        
+    public ResponseEntity<SyncResult> syncRecentTickets(@RequestBody(required = false) SyncRequest request) {
+        int days = request != null && request.getDays() != null ? request.getDays() : 30;
         String jql = String.format("updated >= -%dd ORDER BY updated DESC", days);
-        return syncAllTickets(jql, 100);
+        
+        SyncRequest syncRequest = new SyncRequest();
+        syncRequest.setJql(jql);
+        syncRequest.setMaxResults(100);
+        return syncAllTickets(syncRequest);
+    }
+    
+    /**
+     * Request DTO for sync operations
+     */
+    public static class SyncRequest {
+        private String jql;
+        private Integer maxResults;
+        private Integer days;
+        
+        public String getJql() {
+            return jql;
+        }
+        
+        public void setJql(String jql) {
+            this.jql = jql;
+        }
+        
+        public Integer getMaxResults() {
+            return maxResults;
+        }
+        
+        public void setMaxResults(Integer maxResults) {
+            this.maxResults = maxResults;
+        }
+        
+        public Integer getDays() {
+            return days;
+        }
+        
+        public void setDays(Integer days) {
+            this.days = days;
+        }
     }
 } 

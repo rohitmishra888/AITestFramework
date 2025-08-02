@@ -35,7 +35,7 @@ public class JiraApiResponse {
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Fields {
         private String summary;
-        private String description;
+        private Object description; // Changed from String to Object to handle rich text
         private Status status;
         private Priority priority;
         private User assignee;
@@ -49,8 +49,8 @@ public class JiraApiResponse {
         public String getSummary() { return summary; }
         public void setSummary(String summary) { this.summary = summary; }
 
-        public String getDescription() { return description; }
-        public void setDescription(String description) { this.description = description; }
+        public Object getDescription() { return description; }
+        public void setDescription(Object description) { this.description = description; }
 
         public Status getStatus() { return status; }
         public void setStatus(Status status) { this.status = status; }

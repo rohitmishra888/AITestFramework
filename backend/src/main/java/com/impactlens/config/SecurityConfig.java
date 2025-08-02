@@ -24,6 +24,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers("/actuator/**").permitAll()
                 .requestMatchers("/api/analysis/**").permitAll()
+                .requestMatchers("/api/jira/**").permitAll()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .anyRequest().authenticated()
             );

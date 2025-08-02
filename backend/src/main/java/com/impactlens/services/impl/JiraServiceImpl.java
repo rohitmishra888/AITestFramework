@@ -346,7 +346,10 @@ public class JiraServiceImpl implements JiraService {
         ticket.setTicketKey(issue.getKey());
         ticket.setTicketId(issue.getId());
         ticket.setSummary(fields.getSummary());
-        ticket.setDescription(fields.getDescription());
+        
+        // Handle description field which can be string or rich text object
+        String description = extractTextFromField(fields.getDescription());
+        ticket.setDescription(description);
         
         if (fields.getStatus() != null) {
             ticket.setStatus(fields.getStatus().getName());
@@ -389,5 +392,61 @@ public class JiraServiceImpl implements JiraService {
         }
         
         return ticket;
+    }
+    
+    /**
+     * Extract text from a JIRA field that can be either a string or a rich text object
+     */
+    private String extractTextFromField(Object field) {
+        if (field == null) {
+            return null;
+        }
+        
+        if (field instanceof String) {
+            return (String) field;
+        }
+        
+        // Handle rich text objects (Atlassian Document Format)
+        try {
+            String json = objectMapper.writeValueAsString(field);
+            // Try to extract text from rich text format
+            if (json.contains("\"type\":\"doc\"") || json.contains("\"content\"")) {
+                // This is a rich text object, extract plain text
+                return extractTextFromRichText(json);
+            } else {
+                // Fallback to string representation
+                return field.toString();
+            }
+        } catch (Exception e) {
+            logger.warn("Error extracting text from field: {}", e.getMessage());
+            return field.toString();
+        }
+    }
+    
+    /**
+     * Extract plain text from JIRA rich text format
+     */
+    private String extractTextFromRichText(String json) {
+        try {
+            // Simple text extraction from rich text JSON
+            // Remove JSON structure and extract text content
+            String text = json.replaceAll("\"type\":\"[^\"]*\"", "")
+                             .replaceAll("\"content\":\\[", "")
+                             .replaceAll("\\]", "")
+                             .replaceAll("\"text\":\"", "")
+                             .replaceAll("\"[^}]*}", "")
+                             .replaceAll("\\{", "")
+                             .replaceAll("\\}", "")
+                             .replaceAll(",", " ")
+                             .trim();
+            
+            // Clean up any remaining JSON artifacts
+            text = text.replaceAll("\\s+", " ").trim();
+            
+            return text.isEmpty() ? null : text;
+        } catch (Exception e) {
+            logger.warn("Error extracting text from rich text: {}", e.getMessage());
+            return null;
+        }
     }
 } 
