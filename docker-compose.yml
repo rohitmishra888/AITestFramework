@@ -61,8 +61,7 @@ services:
     ports:
       - "3000:80"
     environment:
-      NEXT_PUBLIC_API_URL: http://localhost:8080
-      NEXT_PUBLIC_APP_NAME: ImpactLens
+      VITE_API_BASE_URL: http://13.233.152.102:8080
     depends_on:
       - backend
     networks:
