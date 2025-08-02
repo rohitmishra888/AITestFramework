@@ -1,10 +1,6 @@
 package com.impactlens.entities;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
-
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -34,13 +30,11 @@ public class UserPreferences {
     @Column(name = "notifications_enabled")
     private boolean notificationsEnabled = true;
     
-    @CreationTimestamp
     @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    private String createdAt;
     
-    @UpdateTimestamp
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    private String updatedAt;
     
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId
@@ -91,19 +85,19 @@ public class UserPreferences {
         this.notificationsEnabled = notificationsEnabled;
     }
     
-    public LocalDateTime getCreatedAt() {
+    public String getCreatedAt() {
         return createdAt;
     }
     
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(String createdAt) {
         this.createdAt = createdAt;
     }
     
-    public LocalDateTime getUpdatedAt() {
+    public String getUpdatedAt() {
         return updatedAt;
     }
     
-    public void setUpdatedAt(LocalDateTime updatedAt) {
+    public void setUpdatedAt(String updatedAt) {
         this.updatedAt = updatedAt;
     }
     

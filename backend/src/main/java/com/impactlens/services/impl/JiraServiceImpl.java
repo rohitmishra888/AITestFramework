@@ -1,6 +1,5 @@
 package com.impactlens.services.impl;
 
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -248,18 +247,18 @@ public class JiraServiceImpl implements JiraService {
         // Parse dates
         try {
             if (fields.getCreated() != null) {
-                ticket.setCreatedAt(LocalDateTime.parse(fields.getCreated().substring(0, 19)));
+                ticket.setCreatedAt(fields.getCreated());
             }
             if (fields.getUpdated() != null) {
-                ticket.setUpdatedAt(LocalDateTime.parse(fields.getUpdated().substring(0, 19)));
+                ticket.setUpdatedAt(fields.getUpdated());
             }
         } catch (Exception e) {
             logger.warn("Error parsing dates for ticket {}: {}", issue.getKey(), e.getMessage());
-            ticket.setCreatedAt(LocalDateTime.now());
-            ticket.setUpdatedAt(LocalDateTime.now());
+            ticket.setCreatedAt(java.time.LocalDateTime.now().toString());
+            ticket.setUpdatedAt(java.time.LocalDateTime.now().toString());
         }
         
-        ticket.setLastSyncedAt(LocalDateTime.now());
+        ticket.setLastSyncedAt(java.time.LocalDateTime.now().toString());
         
         // Store raw data
         try {

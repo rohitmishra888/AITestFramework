@@ -107,7 +107,7 @@ jira:
 
 # OpenAI Configuration
 openai:
-  api-key: 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
+  api-key: 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
   model: gpt-4
   max-tokens: 2000
   temperature: 0.3

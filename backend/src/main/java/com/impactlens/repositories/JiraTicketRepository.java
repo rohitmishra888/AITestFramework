@@ -1,6 +1,5 @@
 package com.impactlens.repositories;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -39,13 +38,13 @@ public interface JiraTicketRepository extends JpaRepository<JiraTicket, UUID> {
      * Find tickets that have expired TTL
      */
     @Query("SELECT jt FROM JiraTicket jt WHERE jt.ttlExpiresAt < :now")
-    List<JiraTicket> findExpiredTickets(@Param("now") LocalDateTime now);
+    List<JiraTicket> findExpiredTickets(@Param("now") String now);
     
     /**
      * Find tickets that need to be synced (older than specified time)
      */
     @Query("SELECT jt FROM JiraTicket jt WHERE jt.lastSyncedAt < :syncTime")
-    List<JiraTicket> findTicketsNeedingSync(@Param("syncTime") LocalDateTime syncTime);
+    List<JiraTicket> findTicketsNeedingSync(@Param("syncTime") String syncTime);
     
     /**
      * Search tickets by summary or description containing text
@@ -71,7 +70,7 @@ public interface JiraTicketRepository extends JpaRepository<JiraTicket, UUID> {
      * Find tickets updated after specific date
      */
     @Query("SELECT jt FROM JiraTicket jt WHERE jt.updatedAt > :since")
-    List<JiraTicket> findTicketsUpdatedSince(@Param("since") LocalDateTime since);
+    List<JiraTicket> findTicketsUpdatedSince(@Param("since") String since);
     
     /**
      * Check if ticket exists by key
@@ -82,5 +81,5 @@ public interface JiraTicketRepository extends JpaRepository<JiraTicket, UUID> {
      * Delete expired tickets
      */
     @Query("DELETE FROM JiraTicket jt WHERE jt.ttlExpiresAt < :now")
-    void deleteExpiredTickets(@Param("now") LocalDateTime now);
+    void deleteExpiredTickets(@Param("now") String now);
 } 

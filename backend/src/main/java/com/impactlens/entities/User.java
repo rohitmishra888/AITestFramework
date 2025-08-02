@@ -1,10 +1,6 @@
 package com.impactlens.entities;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
-
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -60,13 +56,11 @@ public class User {
     @Column(name = "is_active")
     private boolean isActive = true;
     
-    @CreationTimestamp
     @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    private String createdAt;
     
-    @UpdateTimestamp
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    private String updatedAt;
     
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private UserPreferences preferences;
@@ -149,19 +143,19 @@ public class User {
         isActive = active;
     }
     
-    public LocalDateTime getCreatedAt() {
+    public String getCreatedAt() {
         return createdAt;
     }
     
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(String createdAt) {
         this.createdAt = createdAt;
     }
     
-    public LocalDateTime getUpdatedAt() {
+    public String getUpdatedAt() {
         return updatedAt;
     }
     
-    public void setUpdatedAt(LocalDateTime updatedAt) {
+    public void setUpdatedAt(String updatedAt) {
         this.updatedAt = updatedAt;
     }
     

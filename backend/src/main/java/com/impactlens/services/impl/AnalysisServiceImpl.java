@@ -1,6 +1,5 @@
 package com.impactlens.services.impl;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -194,7 +193,7 @@ public class AnalysisServiceImpl implements AnalysisService {
         metadata.setProcessingTime(processingTime);
         metadata.setTicketsAnalyzed(relatedTickets.size() + 1);
         metadata.setCacheHit(false); // TODO: Implement proper cache hit detection
-        metadata.setCompletedAt(LocalDateTime.now());
+        metadata.setCompletedAt(java.time.LocalDateTime.now().toString());
         metadata.setModelUsed("gpt-4");
         
         response.setMetadata(metadata);

@@ -1,6 +1,5 @@
 package com.impactlens.dto;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -229,7 +228,7 @@ public class AnalysisResponse {
         private long processingTime;
         private int ticketsAnalyzed;
         private boolean cacheHit;
-        private LocalDateTime completedAt;
+        private String completedAt;
         private String modelUsed;
         
         // Getters and Setters
@@ -257,11 +256,11 @@ public class AnalysisResponse {
             this.cacheHit = cacheHit;
         }
         
-        public LocalDateTime getCompletedAt() {
+        public String getCompletedAt() {
             return completedAt;
         }
         
-        public void setCompletedAt(LocalDateTime completedAt) {
+        public void setCompletedAt(String completedAt) {
             this.completedAt = completedAt;
         }
         

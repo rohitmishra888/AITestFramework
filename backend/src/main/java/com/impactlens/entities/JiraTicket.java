@@ -1,6 +1,5 @@
 package com.impactlens.entities;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 import jakarta.persistence.Column;
@@ -46,19 +45,19 @@ public class JiraTicket {
     private String reporter;
     
     @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    private String createdAt;
     
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    private String updatedAt;
     
-    @Column(name = "raw_data", columnDefinition = "JSONB")
+    @Column(name = "raw_data", length = 30000, columnDefinition = "TEXT")
     private String rawData;
     
     @Column(name = "last_synced_at")
-    private LocalDateTime lastSyncedAt;
+    private String lastSyncedAt;
     
     @Column(name = "ttl_expires_at")
-    private LocalDateTime ttlExpiresAt;
+    private String ttlExpiresAt;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by")
@@ -145,19 +144,19 @@ public class JiraTicket {
         this.reporter = reporter;
     }
     
-    public LocalDateTime getCreatedAt() {
+    public String getCreatedAt() {
         return createdAt;
     }
     
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(String createdAt) {
         this.createdAt = createdAt;
     }
     
-    public LocalDateTime getUpdatedAt() {
+    public String getUpdatedAt() {
         return updatedAt;
     }
     
-    public void setUpdatedAt(LocalDateTime updatedAt) {
+    public void setUpdatedAt(String updatedAt) {
         this.updatedAt = updatedAt;
     }
     
@@ -169,19 +168,19 @@ public class JiraTicket {
         this.rawData = rawData;
     }
     
-    public LocalDateTime getLastSyncedAt() {
+    public String getLastSyncedAt() {
         return lastSyncedAt;
     }
     
-    public void setLastSyncedAt(LocalDateTime lastSyncedAt) {
+    public void setLastSyncedAt(String lastSyncedAt) {
         this.lastSyncedAt = lastSyncedAt;
     }
     
-    public LocalDateTime getTtlExpiresAt() {
+    public String getTtlExpiresAt() {
         return ttlExpiresAt;
     }
     
-    public void setTtlExpiresAt(LocalDateTime ttlExpiresAt) {
+    public void setTtlExpiresAt(String ttlExpiresAt) {
         this.ttlExpiresAt = ttlExpiresAt;
     }
     
