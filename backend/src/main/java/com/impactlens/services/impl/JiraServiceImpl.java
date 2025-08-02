@@ -2,7 +2,9 @@ package com.impactlens.services.impl;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +21,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.impactlens.config.JiraConfig;
 import com.impactlens.dto.JiraApiResponse;
+import com.impactlens.dto.SyncResult;
 import com.impactlens.entities.JiraTicket;
+import com.impactlens.repositories.JiraTicketRepository;
 import com.impactlens.services.JiraService;
 
 @Service
@@ -36,6 +40,9 @@ public class JiraServiceImpl implements JiraService {
     
     @Autowired
     private ObjectMapper objectMapper;
+    
+    @Autowired
+    private JiraTicketRepository jiraTicketRepository;
     
     @Override
     public JiraTicket fetchTicket(String ticketKey) {
@@ -217,6 +224,119 @@ public class JiraServiceImpl implements JiraService {
         }
         
         return "";
+    }
+    
+    @Override
+    public SyncResult syncAllJiraTickets(String jql, int maxResults) {
+        logger.info("Starting JIRA sync with JQL: {}, maxResults: {}", jql, maxResults);
+        
+        SyncResult result = new SyncResult(jql);
+        
+        // Validate configuration first
+        if (!jiraConfig.isValidConfiguration()) {
+            logger.error("Invalid Jira configuration. Please check base URL, username, and API token.");
+            result.setStatus("FAILED");
+            result.setErrorMessage("Invalid Jira configuration");
+            result.setSyncEndTime(java.time.LocalDateTime.now());
+            return result;
+        }
+        
+        try {
+            // Get existing ticket keys from database for efficient comparison
+            Set<String> existingTicketKeys = new HashSet<>(jiraTicketRepository.findAllTicketKeys());
+            logger.info("Found {} existing tickets in database", existingTicketKeys.size());
+            
+            // Fetch tickets from JIRA
+            List<JiraTicket> ticketsToSave = new ArrayList<>();
+            List<String> failedTicketKeys = new ArrayList<>();
+            
+            String url = jiraConfig.getFormattedBaseUrl() + "rest/api/3/search";
+            
+            UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url)
+                .queryParam("jql", jql)
+                .queryParam("maxResults", maxResults)
+                .queryParam("fields", "summary,description,status,priority,assignee,reporter,created,updated");
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Authorization", jiraConfig.getBasicAuthHeader());
+            headers.set("Accept", "application/json");
+            headers.set("Content-Type", "application/json");
+            headers.set("User-Agent", "ImpactLens/1.0");
+            
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+            
+            ResponseEntity<JiraApiResponse.SearchResponse> response = jiraRestTemplate.exchange(
+                builder.toUriString(), HttpMethod.GET, entity, JiraApiResponse.SearchResponse.class);
+            
+            JiraApiResponse.SearchResponse searchResponse = response.getBody();
+            if (searchResponse != null && searchResponse.getIssues() != null) {
+                logger.info("Fetched {} tickets from JIRA", searchResponse.getIssues().size());
+                
+                for (JiraApiResponse.Issue issue : searchResponse.getIssues()) {
+                    try {
+                        JiraTicket ticket = convertToJiraTicket(issue);
+                        
+                        // Check if ticket already exists
+                        if (existingTicketKeys.contains(ticket.getTicketKey())) {
+                            // Update existing ticket
+                            JiraTicket existingTicket = jiraTicketRepository.findByTicketKey(ticket.getTicketKey()).orElse(null);
+                            if (existingTicket != null) {
+                                // Update fields
+                                existingTicket.setSummary(ticket.getSummary());
+                                existingTicket.setDescription(ticket.getDescription());
+                                existingTicket.setStatus(ticket.getStatus());
+                                existingTicket.setPriority(ticket.getPriority());
+                                existingTicket.setAssignee(ticket.getAssignee());
+                                existingTicket.setReporter(ticket.getReporter());
+                                existingTicket.setCreatedAt(ticket.getCreatedAt());
+                                existingTicket.setUpdatedAt(ticket.getUpdatedAt());
+                                existingTicket.setRawData(ticket.getRawData());
+                                existingTicket.setLastSyncedAt(ticket.getLastSyncedAt());
+                                
+                                ticketsToSave.add(existingTicket);
+                                result.setExistingTicketsUpdated(result.getExistingTicketsUpdated() + 1);
+                            }
+                        } else {
+                            // Add new ticket
+                            ticketsToSave.add(ticket);
+                            result.setNewTicketsAdded(result.getNewTicketsAdded() + 1);
+                        }
+                        
+                        result.setTotalTicketsFetched(result.getTotalTicketsFetched() + 1);
+                        
+                    } catch (Exception e) {
+                        logger.error("Error processing ticket {}: {}", issue.getKey(), e.getMessage());
+                        failedTicketKeys.add(issue.getKey());
+                        result.setFailedTickets(result.getFailedTickets() + 1);
+                    }
+                }
+                
+                // Save all tickets to database
+                if (!ticketsToSave.isEmpty()) {
+                    jiraTicketRepository.saveAll(ticketsToSave);
+                    logger.info("Successfully saved {} tickets to database", ticketsToSave.size());
+                }
+                
+                result.setFailedTicketKeys(failedTicketKeys);
+                result.setStatus("COMPLETED");
+                
+            } else {
+                logger.warn("No tickets found or empty response from JIRA");
+                result.setStatus("COMPLETED");
+            }
+            
+        } catch (Exception e) {
+            logger.error("Error syncing JIRA tickets: {}", e.getMessage(), e);
+            result.setStatus("FAILED");
+            result.setErrorMessage(e.getMessage());
+        }
+        
+        result.setSyncEndTime(java.time.LocalDateTime.now());
+        logger.info("JIRA sync completed. Total: {}, New: {}, Updated: {}, Failed: {}", 
+            result.getTotalTicketsFetched(), result.getNewTicketsAdded(), 
+            result.getExistingTicketsUpdated(), result.getFailedTickets());
+        
+        return result;
     }
     
     private JiraTicket convertToJiraTicket(JiraApiResponse.Issue issue) {

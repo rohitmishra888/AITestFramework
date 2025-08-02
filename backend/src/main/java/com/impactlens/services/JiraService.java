@@ -1,5 +1,6 @@
 package com.impactlens.services;
 
+import com.impactlens.dto.SyncResult;
 import com.impactlens.entities.JiraTicket;
 
 public interface JiraService {
@@ -28,4 +29,10 @@ public interface JiraService {
      * Get ticket attachments
      */
     String getTicketAttachments(String ticketKey);
+    
+    /**
+     * Fetch all JIRAs and save them to database
+     * Updates existing tickets and adds new ones
+     */
+    SyncResult syncAllJiraTickets(String jql, int maxResults);
 } 

@@ -82,4 +82,10 @@ public interface JiraTicketRepository extends JpaRepository<JiraTicket, UUID> {
      */
     @Query("DELETE FROM JiraTicket jt WHERE jt.ttlExpiresAt < :now")
     void deleteExpiredTickets(@Param("now") String now);
+    
+    /**
+     * Find all ticket keys in the database
+     */
+    @Query("SELECT jt.ticketKey FROM JiraTicket jt")
+    List<String> findAllTicketKeys();
 } 
