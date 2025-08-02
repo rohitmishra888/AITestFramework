@@ -48,20 +48,36 @@ export interface AnalysisRequest {
 }
 
 export interface AnalysisResponse {
-  id: string
+  analysisId: string
   ticketId: string
   status: string
   report: {
     summary: string
-    relatedTickets: Array<{
+    gapsIdentified?: Array<{
+      category: string
+      description: string
+      severity: 'High' | 'Medium' | 'Low'
+      impact: string
+      suggestions: string[]
+    }>
+    relatedTickets?: Array<{
       ticketKey: string
       summary: string
-      description: string
-      severity: string
+      status: string
+      priority: string
       relevanceScore: number
-      url: string
+      relationshipType: string
+      impactDescription: string
     }>
-    riskAssessment: {
+    regressionAreas?: Array<{
+      area: string
+      description: string
+      riskLevel: 'High' | 'Medium' | 'Low'
+      testCases: string[]
+      rationale: string
+    }>
+    recommendations?: string[]
+    riskAssessment?: {
       risks: Array<{
         level: string
         title: string
@@ -69,11 +85,7 @@ export interface AnalysisResponse {
         mitigation?: string
       }>
     }
-    recommendations: Array<{
-      title: string
-      description: string
-    }>
-    metrics: {
+    metrics?: {
       impactScore: number
       affectedTeams: number
       timelineImpact: string
@@ -82,7 +94,10 @@ export interface AnalysisResponse {
   metadata: {
     processingTime: number
     ticketsAnalyzed: number
-    createdAt: string
+    cacheHit: boolean
+    completedAt: string
+    modelUsed: string
+    createdAt?: string
   }
 }
 
