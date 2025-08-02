@@ -1,5 +1,5 @@
 version: '3.8'
-
+ 
 services:
   # PostgreSQL Database
   postgres:
@@ -15,7 +15,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - impactlens-network
-
+ 
   # Redis Cache
   redis:
     image: redis:7-alpine
@@ -26,7 +26,7 @@ services:
       - redis_data:/data
     networks:
       - impactlens-network
-
+ 
   # Spring Boot Backend
   backend:
     build:
@@ -47,10 +47,10 @@ services:
       - redis
     networks:
       - impactlens-network
-    volumes:
-      - ./backend:/app
-      - /app/target
-
+    # volumes:
+    #   - ./backend:/app
+    #   - /app/target
+ 
   # Next.js Frontend
   frontend:
     build:
@@ -69,11 +69,11 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
-
+ 
 volumes:
   postgres_data:
   redis_data:
-
+ 
 networks:
   impactlens-network:
-    driver: bridge 
+    driver: bridge
